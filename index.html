@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARM - Plateforme de Mobilisation</title>
+    
+    <!-- Tailwind CSS pour le design moderne et fluide -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS & JS pour la Carte Interactive du Mali -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* Couleurs personnalisées (Inspirées du drapeau Malien : Vert, Jaune/Or, Rouge) */
+        .bg-arm-green { background-color: #14b8a6; } /* Vert émeraude moderne */
+        .text-arm-green { color: #14b8a6; }
+        .bg-arm-gold { background-color: #f59e0b; }
+        .text-arm-gold { color: #f59e0b; }
+        
+        /* Cacher les sections inactives */
+        .page-section { display: none; animation: fadeIn 0.3s; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Style de la carte interactive */
+        #map { height: 400px; width: 100%; border-radius: 1rem; z-index: 10; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 flex h-screen overflow-hidden">
+
+    <!-- BARRE LATÉRALE (NAVIGATION) -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-10 h-10 bg-arm-green rounded-lg flex items-center justify-center font-bold text-xl">A</div>
+            <h1 class="text-2xl font-bold tracking-wider">ARM</h1>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <button onclick="showPage('dashboard')" class="nav-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-left text-arm-green bg-slate-800">
+                <i class="fa-solid fa-id-card"></i> Mon Espace
+            </button>
+            <button onclick="showPage('mapSection')" class="nav-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-left text-slate-400">
+                <i class="fa-solid fa-map-location-dot"></i> Carte Interactive
+            </button>
+            <button onclick="showPage('media')" class="nav-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-left text-slate-400">
+                <i class="fa-solid fa-tv"></i> ARM TV & Radio
+            </button>
+            <button onclick="showPage('social')" class="nav-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-left text-slate-400">
+                <i class="fa-solid fa-users"></i> Réseau Social
+            </button>
+            <button onclick="showPage('donations')" class="nav-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-left text-slate-400">
+                <i class="fa-solid fa-hand-holding-dollar"></i> Dons & Reçus
+            </button>
+            <button onclick="showPage('youth')" class="nav-btn w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-left text-slate-400">
+                <i class="fa-solid fa-seedling"></i> Jeunesse & Femmes
+            </button>
+        </nav>
+        <div class="p-4">
+            <button class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-600 transition-colors text-left text-slate-300">
+                <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto relative">
+        
+        <!-- HEADER MOBILE -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center md:hidden">
+            <h1 class="text-xl font-bold text-slate-900">ARM</h1>
+            <button class="text-slate-600"><i class="fa-solid fa-bars text-2xl"></i></button>
+        </header>
+
+        <div class="p-6 md:p-10 flex-1">
+            
+            <!-- SECTION 1 : TABLEAU DE BORD & CARTE MEMBRE -->
+            <section id="dashboard" class="page-section active">
+                <h2 class="text-3xl font-bold mb-6">Centre de Mobilisation</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Carte Numérique de Membre -->
+                    <div class="col-span-1 lg:col-span-2 bg-gradient-to-br from-teal-600 to-emerald-800 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-20"><i class="fa-solid fa-fingerprint text-6xl"></i></div>
+                        <div class="flex justify-between items-start mb-8">
+                            <div>
+                                <h3 class="text-lg font-medium opacity-90">CARTE D'ADHÉRENT NUMÉRIQUE</h3>
+                                <p class="text-3xl font-bold mt-1">ARM - MALI</p>
+                            </div>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=ARM-2026-987654" alt="QR Code" class="rounded bg-white p-1">
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-sm opacity-80 uppercase">Membre</p>
+                                <p class="text-xl font-semibold">Ousmane Traoré</p>
+                                <p class="text-sm mt-2 opacity-80 uppercase">Section</p>
+                                <p class="font-medium">Bamako - Commune IV</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm opacity-80 uppercase">N° Adhérent</p>
+                                <p class="text-xl font-mono tracking-wider font-semibold">ARM-987-654</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques rapides -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-solid fa-users text-xl"></i></div>
+                            <div>
+                                <p class="text-sm text-slate-500">Militants Actifs (Live)</p>
+                                <p class="text-2xl font-bold">14,203</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fa-solid fa-calendar-check text-xl"></i></div>
+                            <div>
+                                <p class="text-sm text-slate-500">Événements à venir</p>
+                                <p class="text-2xl font-bold">12</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2 : CARTE INTERACTIVE -->
+            <section id="mapSection" class="page-section">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold">Carte Interactive du Mali</h2>
+                        <p class="text-slate-500 mt-1">Découvrez nos sections ARM, responsables et bureaux communaux.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                    <div id="map"></div> <!-- Le script Leaflet injectera la carte ici -->
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 text-center shadow-sm"><span class="block text-2xl font-bold text-arm-green">6</span><span class="text-xs text-slate-500">Régions Couvertes</span></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 text-center shadow-sm"><span class="block text-2xl font-bold text-arm-green">42</span><span class="text-xs text-slate-500">Bureaux Communaux</span></div>
+                </div>
+            </section>
+
+            <!-- SECTION 3 : ARM TV & MEDIA -->
+            <section id="media" class="page-section">
+                <h2 class="text-3xl font-bold mb-6"><span class="text-red-500 animate-pulse">● LIVE</span> ARM TV</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <!-- Faux Player Vidéo -->
+                        <div class="bg-slate-900 rounded-2xl aspect-video flex items-center justify-center relative overflow-hidden shadow-lg">
+                            <img src="https://images.unsplash.com/photo-1557992260-ec58e38d363c?auto=format&fit=crop&q=80&w=1000" alt="Meeting" class="absolute inset-0 w-full h-full object-cover opacity-50">
+                            <button class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white text-2xl z-10 hover:scale-110 transition-transform"><i class="fa-solid fa-play ml-1"></i></button>
+                            <div class="absolute bottom-4 left-4 z-10">
+                                <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">EN DIRECT</span>
+                                <h3 class="text-white font-bold mt-2">Discours du Secrétaire Général - Bamako</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chat en direct TV -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col h-[400px]">
+                        <div class="p-4 border-b border-slate-100 font-bold flex justify-between">
+                            <span>Chat en direct</span>
+                            <span class="text-sm text-slate-500"><i class="fa-solid fa-eye"></i> 3.2k</span>
+                        </div>
+                        <div class="flex-1 p-4 overflow-y-auto space-y-3 text-sm">
+                            <p><span class="font-bold text-arm-green">Fatoumata:</span> Excellent discours ! 👏</p>
+                            <p><span class="font-bold text-arm-gold">Moussa_K:</span> La jeunesse est avec vous.</p>
+                            <p><span class="font-bold text-blue-600">Aliou:</span> Quel est le programme pour Kayes ?</p>
+                        </div>
+                        <div class="p-3 border-t border-slate-100 flex gap-2">
+                            <input type="text" placeholder="Réagissez..." class="flex-1 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none">
+                            <button class="bg-arm-green text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4 : RÉSEAU SOCIAL -->
+            <section id="social" class="page-section">
+                <div class="max-w-2xl mx-auto">
+                    <h2 class="text-2xl font-bold mb-6">Le Mur des Militants</h2>
+                    
+                    <!-- Créer un post -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                        <textarea placeholder="Partagez une idée, un débat..." class="w-full bg-slate-50 rounded-xl p-3 outline-none resize-none h-24 text-slate-700"></textarea>
+                        <div class="flex justify-between items-center mt-3">
+                            <div class="flex gap-3 text-slate-400">
+                                <button class="hover:text-arm-green"><i class="fa-solid fa-image"></i></button>
+                                <button class="hover:text-arm-green"><i class="fa-solid fa-video"></i></button>
+                            </div>
+                            <button class="bg-arm-green text-white px-5 py-2 rounded-lg font-medium hover:bg-teal-600">Publier</button>
+                        </div>
+                    </div>
+
+                    <!-- Flux d'actualités -->
+                    <div class="space-y-4">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-arm-gold text-white rounded-full flex items-center justify-center font-bold">S</div>
+                                <div>
+                                    <p class="font-bold">Section Jeunesse - Sikasso</p>
+                                    <p class="text-xs text-slate-500">Il y a 2 heures</p>
+                                </div>
+                            </div>
+                            <p class="text-slate-700 mb-4">La réunion de préparation pour le projet d'entrepreneuriat agricole a été un immense succès ! Plus de 200 jeunes présents. L'avenir est en marche. 🌾🇲🇱</p>
+                            <div class="flex gap-6 text-slate-500 text-sm border-t border-slate-100 pt-3">
+                                <button class="hover:text-red-500"><i class="fa-regular fa-heart"></i> 142</button>
+                                <button class="hover:text-blue-500"><i class="fa-regular fa-comment"></i> 24</button>
+                                <button class="hover:text-green-500"><i class="fa-solid fa-share-nodes"></i> Partager</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ASSISTANT IA ARM (CHATBOT) -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <!-- Bulle de chat -->
+        <button id="chatbotToggle" onclick="toggleChat()" class="w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-105 transition-transform">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+        
+        <!-- Fenêtre de chat -->
+        <div id="chatbotWindow" class="hidden absolute bottom-16 right-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-arm-green"></i>
+                    <span class="font-bold">IA - ARM Assistant</span>
+                </div>
+                <button onclick="toggleChat()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div id="chatMessages" class="p-4 h-64 overflow-y-auto bg-slate-50 text-sm space-y-3">
+                <div class="bg-white border border-slate-200 p-3 rounded-xl rounded-tl-none inline-block max-w-[85%] text-slate-700">
+                    Bonjour ! Je suis l'intelligence artificielle du parti. Avez-vous une question sur notre programme, les événements ou l'aide à l'entrepreneuriat ?
+                </div>
+            </div>
+            <div class="p-3 border-t border-slate-100 bg-white flex gap-2">
+                <input type="text" id="aiInput" placeholder="Posez votre question..." class="flex-1 bg-slate-100 rounded-lg px-3 py-2 text-sm outline-none">
+                <button onclick="sendAiMessage()" class="bg-arm-green text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIQUE JAVASCRIPT -->
+    <script>
+        // 1. Système de Navigation fluide
+        function showPage(pageId) {
+            // Cacher toutes les sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Retirer le style actif de tous les boutons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-arm-green', 'bg-slate-800');
+                btn.classList.add('text-slate-400');
+            });
+            
+            // Afficher la page demandée
+            document.getElementById(pageId).classList.add('active');
+            
+            // Mettre à jour la carte si on l'ouvre (requis par Leaflet)
+            if(pageId === 'mapSection' && !mapInitialized) {
+                initMap();
+            }
+        }
+
+        // 2. Initialisation de la Carte Interactive (Leaflet)
+        let mapInitialized = false;
+        function initMap() {
+            // Centré sur le Mali
+            const map = L.map('map').setView([17.5707, -3.9962], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Données des sections ARM
+            const sections = [
+                { name: "Bamako (Siège)", coords: [12.6392, -8.0029], text: "Bureau National & Commune IV" },
+                { name: "Kangaba", coords: [11.9333, -8.4167], text: "Section Historique" },
+                { name: "Kayes", coords: [14.44, -11.43], text: "Responsable: M. Diallo" },
+                { name: "Sikasso", coords: [11.3175, -5.6667], text: "Pôle Agriculture & Jeunesse" },
+                { name: "Gao", coords: [16.2717, -0.0447], text: "Coordination Nord" },
+                { name: "Tombouctou", coords: [16.7735, -3.0074], text: "Antenne Culturelle" }
+            ];
+
+            // Icône personnalisée verte
+            const armIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:#14b8a6; width:15px; height:15px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);'></div>",
+                iconSize: [15, 15],
+                iconAnchor: [7, 7]
+            });
+
+            // Ajouter les marqueurs
+            sections.forEach(sec => {
+                L.marker(sec.coords, {icon: armIcon})
+                 .bindPopup(`<b>${sec.name}</b><br>${sec.text}`)
+                 .addTo(map);
+            });
+            mapInitialized = true;
+        }
+
+        // 3. Logique du Chatbot IA
+        function toggleChat() {
+            const chat = document.getElementById('chatbotWindow');
+            chat.classList.toggle('hidden');
+        }
+
+        function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const messages = document.getElementById('chatMessages');
+            const text = input.value.trim();
+            
+            if(text !== "") {
+                // Message de l'utilisateur
+                messages.innerHTML += `<div class="text-right mb-3"><div class="bg-arm-green text-white p-3 rounded-xl rounded-tr-none inline-block max-w-[85%]">${text}</div></div>`;
+                input.value = '';
+                messages.scrollTop = messages.scrollHeight;
+
+                // Simulation de réflexion IA puis réponse automatique
+                setTimeout(() => {
+                    messages.innerHTML += `<div class="mb-3"><div class="bg-white border border-slate-200 p-3 rounded-xl rounded-tl-none inline-block max-w-[85%] text-slate-700">C'est une excellente question. Selon le programme de l'ARM, la priorité est donnée à l'emploi des jeunes via des fonds d'incitation régionaux (notamment à Sikasso et Kayes). Souhaitez-vous télécharger le manifeste complet ?</div></div>`;
+                    messages.scrollTop = messages.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        // Écouter la touche Entrée pour l'IA
+        document.getElementById('aiInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendAiMessage();
+        });
+    </script>
+</body>
+</html>
